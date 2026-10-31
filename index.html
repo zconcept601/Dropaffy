@@ -1,156 +1,562 @@
-<!doctype html>
-<html lang="fr"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0B1F4B">
-<title>DropAffy</title>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-<style>
-:root{--ink:#0B1F4B;--blue:#1F4FFF;--sky:#E9EFFF;--bg:#F2F4F8;--line:#E1E6EF;--amber:#F5A400;--tx:#1B2540;--mut:#6B7593;--ok:#12A150;--bad:#D63A3A;--f1:'Bricolage Grotesque',system-ui,sans-serif;--f2:'Instrument Sans',system-ui,sans-serif}
-*{box-sizing:border-box;margin:0}html,body{height:100%}
-body{font:15px/1.5 var(--f2);color:var(--tx);background:var(--bg);-webkit-font-smoothing:antialiased}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:0;background:var(--blue);color:#fff;padding:.7rem 1.1rem;border-radius:12px;font-weight:600;transition:transform .1s,opacity .2s}
-button:active{transform:scale(.97)}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9DB4FF;outline-offset:1px}
-button.ghost{background:var(--sky);color:var(--blue)}button.sm{padding:.4rem .8rem;font-size:13px;border-radius:9px}button.bad{background:#FDECEC;color:var(--bad)}
-input,select,textarea{width:100%;font-size:16px;padding:.75rem .9rem;border:1.5px solid var(--line);border-radius:12px;background:#fff;margin-top:.35rem}
-textarea{min-height:110px;resize:none}label{display:block;font-weight:600;font-size:13px;margin-top:.9rem}
-#app{width:100%;margin:0 auto;min-height:100%;background:var(--bg);position:relative;padding-bottom:84px}
-header{position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:.8rem 1.1rem;padding-top:calc(.8rem + env(safe-area-inset-top,0px));background:var(--ink);color:#fff}
-.logo{font:800 22px var(--f1);letter-spacing:-.5px}.logo i{font-style:normal;color:#8FB0FF}
-.bell{background:#ffffff1f;padding:.45rem .7rem;position:relative}.bell em{position:absolute;top:-3px;right:-3px;background:var(--amber);color:var(--ink);font:700 11px var(--f2);min-width:18px;height:18px;border-radius:9px;display:grid;place-items:center;font-style:normal}
-main{padding:1rem 1.1rem}h1,h2,h3{font-family:var(--f1);letter-spacing:-.3px;line-height:1.2}h2{font-size:24px;margin-bottom:.8rem}h3{font-size:17px;margin:.35rem 0}
-.search{border-radius:14px;box-shadow:0 1px 0 var(--line)}
-.seg{display:grid;grid-template-columns:1fr 1fr;background:#E4E8F1;border-radius:12px;padding:4px;margin:.8rem 0}.seg button{background:none;color:var(--mut);padding:.55rem}.seg .on{background:#fff;color:var(--ink);box-shadow:0 1px 3px #0b1f4b22}
-.cta{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}.cta button{font-size:13px;padding:.65rem .4rem}
-.stack{display:grid;gap:.8rem}
-.card{background:#fff;border-radius:16px;padding:1rem;border-left:5px solid var(--blue)}.card.s{border-left-color:var(--amber)}
-.card p{color:#46506D;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.card footer{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin-top:.8rem;flex-wrap:wrap}.card footer span{display:flex;gap:.4rem}
-.who{display:flex;gap:.7rem;align-items:center;cursor:pointer}.who div{flex:1;min-width:0;display:grid}.who b{font-size:14px}small{color:var(--mut);font-size:12.5px}
-.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--blue);background:var(--sky);padding:.15rem .6rem;border-radius:99px;margin-top:.7rem}.card.s .tag{background:#FFF3D6;color:#8A5B00}
-.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font:700 15px var(--f1);flex:none}.av.lg{width:72px;height:72px;font-size:24px}
-.empty{text-align:center;padding:2.5rem 1rem;background:#fff;border-radius:16px}.empty p{color:var(--mut)}.muted{color:var(--mut)}
-.row{display:flex;gap:.7rem;align-items:center;background:#fff;border-radius:14px;padding:.8rem;margin-bottom:.6rem}.row div{flex:1;min-width:0;display:grid}.row .acts{display:flex;gap:.4rem;flex:none}
-h4{margin:1.2rem 0 .5rem;font-size:14px;color:var(--mut)}
-#sheet{position:fixed;inset:0;background:#0b1f4b8c;z-index:20;display:none;align-items:flex-end;justify-content:center}#sheet.on{display:flex}
-.panel{background:#fff;width:100%;max-height:88%;overflow:auto;border-radius:22px 22px 0 0;padding:1.3rem 1.2rem calc(1.3rem + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:0}}
-.msgs{display:grid;gap:.4rem;max-height:46vh;overflow:auto;margin:.8rem 0}.m{max-width:80%;padding:.5rem .8rem;border-radius:14px;background:var(--bg)}.m.me{justify-self:end;background:var(--blue);color:#fff}
-.send{display:flex;gap:.5rem}.send input{margin:0}
-#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.7rem 1.1rem;border-radius:12px;z-index:30;display:none;max-width:90%;text-align:center}
-.hero{background:var(--ink);color:#fff;padding:calc(2.2rem + env(safe-area-inset-top,0px)) 1.4rem 2rem;position:relative;overflow:hidden}
-.hero h1{font-size:34px;font-weight:800;max-width:11em}.hero p{color:#B9C6EA;margin-top:.8rem;max-width:26em}
-.mini{position:absolute;right:-18px;top:34px;width:150px;background:#fff;color:var(--tx);border-radius:12px;padding:.6rem;font-size:11px;border-left:4px solid var(--blue);transform:rotate(6deg);opacity:.95}.mini.b{top:112px;right:26px;border-left-color:var(--amber);transform:rotate(-4deg)}
-.auth{padding:1.2rem 1.4rem}.auth .seg{margin-top:0}.err{color:var(--bad);font-size:13px;margin-top:.6rem}
-@media(min-width:700px){#app,nav{max-width:760px}.panel{max-width:620px;border-radius:22px;align-self:center}}.bell em[hidden]{display:none}@media(max-width:420px){.mini{display:none}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DropAffy V1.1 - Application Professionnelle</title>
+  <!-- Inclusion de Lucide Icons pour des icônes professionnelles et cohérentes (22-26px) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --font-size-logo: 25px;
+      --font-size-h1: 28px;
+      --font-size-h2: 21px;
+      --font-size-card-title: 20px;
+      --font-size-body: 16.5px;
+      --font-size-meta: 14px;
+      --font-size-btn: 15.5px;
+      --touch-min-height: 46px;
+      --touch-min-size: 44px;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg-color: #f8fafc;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
 
-body{font-size:16.5px}.logo{font-size:25px}h2{font-size:29px}h3{font-size:20px;line-height:1.25}small{font-size:14px}.tag{font-size:14px}
-button{min-height:46px;font-size:15.5px}button.sm{min-height:44px;padding:.5rem 1rem;font-size:15px}input,select,textarea{min-height:48px}
-main{padding:1.2rem}.card{padding:1.2rem}.card p{font-size:16.5px;-webkit-line-clamp:4}.av{width:48px;height:48px;object-fit:cover}.who b{font-size:16.5px}.stack{gap:1rem}
-i[data-lucide],svg.lucide{width:24px;height:24px}.ico{display:inline-flex;align-items:center;gap:5px}.ico svg{width:16px;height:16px}
-nav button{font-size:12.5px;min-height:62px;gap:2px}nav .pub{color:var(--blue);font-weight:700}nav .pub span{background:var(--blue);color:#fff;border-radius:18px;width:54px;height:54px;display:grid;place-items:center;margin-top:-24px;box-shadow:0 6px 16px #1f4fff55}
-.bell{min-width:46px;min-height:46px;display:grid;place-items:center}
-@media(min-width:900px){#app,nav{max-width:1000px}.stack{grid-template-columns:1fr 1fr}.tiles{grid-template-columns:repeat(3,1fr)}main{padding:1.6rem 2rem}}
-</style></head><body>
-<div id="app"></div><div id="sheet" onclick="if(event.target==this)closeSheet()"></div><div id="toast" role="status"></div>
-<script>
-const sb=supabase.createClient('https://fodmqtpaxygjoimuvvaw.supabase.co','sb_publishable_17TCsv957eSSrQIg_8BwDg_q6jSFNkB');
-const $=s=>document.querySelector(s),app=$('#app');
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const name=p=>(p&&`${p.first_name||''} ${p.last_name||''}`.trim())||'Membre';
-const hue=s=>[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%360;
-const av=(p,z='')=>{const n=name(p);if(p&&p.avatar_url)return `<img class="av ${z}" src="${esc(p.avatar_url)}" alt="">`;return `<span class="av ${z}" style="background:hsl(${hue(n)} 60% 92%);color:hsl(${hue(n)} 55% 28%)">${esc(n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase())}</span>`};
-const ago=d=>{const m=(Date.now()-new Date(d))/6e4;return m<1?"à l'instant":m<60?`il y a ${m|0} min`:m<1440?`il y a ${m/60|0} h`:`il y a ${m/1440|0} j`};
-const CATS=['Produits','Services','Prestations','Opportunités commerciales','Fournisseurs','Partenaires','Immobilier','Emploi','Transport et livraison','Autre'];
-let me=null,view='home',kind='offers',q='',items=[],ch=null,authMode='in',lim=20;
-const ic=n=>`<i data-lucide="${n}"></i>`,hm=d=>new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-const STX={active:'Active',closed:'Clôturée',expired:'Expirée',suspended:'Suspendue'};
-const FR=m=>/Invalid login/i.test(m)?'E-mail ou mot de passe incorrect.':/already registered/i.test(m)?'Cette adresse e-mail est déjà utilisée.':/at least 6/i.test(m)?'Le mot de passe doit contenir au moins 6 caractères.':/rate limit/i.test(m)?'Trop de tentatives. Réessayez dans quelques minutes.':/not confirmed/i.test(m)?"Confirmez d'abord votre adresse e-mail.":'Une erreur est survenue. Réessayez.';
-new MutationObserver(()=>{clearTimeout(window._i);window._i=setTimeout(()=>window.lucide&&lucide.createIcons(),0)}).observe(document.body,{childList:true,subtree:true});
-function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3600)}
-function sheet(h){const s=$('#sheet');s.innerHTML=`<div class="panel">${h}</div>`;s.classList.add('on')}
-function closeSheet(){$('#sheet').classList.remove('on');if(ch){sb.removeChannel(ch);ch=null}}
-function shell(inner){app.innerHTML=`<header><b class="logo">Drop<i>Affy</i></b><button class="bell" onclick="go('notifs')" aria-label="Notifications">${ic('bell')}<em id="nb" hidden></em></button></header><main>${inner}</main><nav>${[['home','Accueil','house'],['new','Publier','plus'],['contacts','Contacts','users'],['dash','Activité','chart-column'],['me','Profil','user-round']].map(([k,l,i])=>`<button class="${view==k?'on':''} ${k=='new'?'pub':''}" onclick="go('${k}')"><span>${ic(i)}</span>${l}</button>`).join('')}</nav>`;badge()}
-async function badge(){const{count}=await sb.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',me.id).eq('is_read',false);const b=$('#nb');if(b&&count){b.hidden=false;b.textContent=count}}
-function go(v){view=v;scrollTo(0,0);V[v]()}
-/* ---------- AUTH ---------- */
-function authView(){const up=authMode=='up';app.innerHTML=`<section class="hero"><b class="logo">Drop<i>Affy</i></b><h1 style="margin-top:2.2rem">Vos publications créent vos opportunités.</h1><p>La communauté professionnelle des entrepreneurs, fournisseurs et prestataires d'Afrique de l'Ouest.</p><div class="mini"><b>Cherche fournisseur de riz</b><br>Ouagadougou</div><div class="mini b"><b>Offre : onduleurs solaires</b><br>Bobo-Dioulasso</div></section>
-<section class="auth"><div class="seg" style="margin-top:1.2rem"><button class="${up?'':'on'}" onclick="authMode='in';authView()">Connexion</button><button class="${up?'on':''}" onclick="authMode='up';authView()">Créer un compte</button></div>
-${up?`<label>Prénom<input id="fn" autocomplete="given-name"></label><label>Nom<input id="ln" autocomplete="family-name"></label>`:''}
-<label>Adresse e-mail<input id="em" type="email" autocomplete="email"></label><label>Mot de passe<input id="pw" type="password" autocomplete="${up?'new-password':'current-password'}"></label>
-<p class="err" id="er"></p><button style="width:100%;margin-top:1rem" onclick="doAuth()">${up?'Créer mon compte':'Me connecter'}</button>${up?'':'<button class="ghost" style="width:100%;margin-top:.6rem" onclick="forgot()">Mot de passe oublié</button>'}<p class="muted" style="margin-top:.8rem;text-align:center"><small>Inscription et consultation gratuites.</small></p></section>`}
-async function doAuth(){const em=$('#em').value.trim(),pw=$('#pw').value,er=$('#er');er.textContent='';
-let r;if(authMode=='up'){r=await sb.auth.signUp({email:em,password:pw,options:{emailRedirectTo:location.origin+location.pathname,data:{first_name:$('#fn').value.trim(),last_name:$('#ln').value.trim()}}});if(!r.error&&!r.data.session){er.style.color='var(--ok)';er.textContent='Compte créé. Confirmez votre e-mail puis connectez-vous.';return}}
-else r=await sb.auth.signInWithPassword({email:em,password:pw});
-if(r.error)er.textContent=FR(r.error.message)}
-async function forgot(){const em=$('#em').value.trim(),e=$('#er');if(!em){e.textContent='Entrez votre e-mail ci-dessus.';return}const{error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});e.style.color=error?'var(--bad)':'var(--ok)';e.textContent=error?'Envoi impossible. Réessayez.':'Un e-mail de réinitialisation vous a été envoyé.'}
-function recov(){window._rec=1;app.innerHTML=`<section class="auth" style="padding-top:3rem"><h2>Nouveau mot de passe</h2><label>Mot de passe<input id="np" type="password" autocomplete="new-password"></label><p class="err" id="er"></p><button style="width:100%;margin-top:1rem" onclick="setPw()">Enregistrer</button></section>`}
-async function setPw(){const{error}=await sb.auth.updateUser({password:$('#np').value});if(error){$('#er').textContent=FR(error.message);return}window._rec=0;toast('Mot de passe modifié.');go('home')}
-/* ---------- VIEWS ---------- */
-const V={};
-V.home=async()=>{shell(`<input id="q" class="search" placeholder="Rechercher une offre ou un besoin" value="${esc(q)}" oninput="q=this.value;list()"><div class="seg"><button class="${kind=='offers'?'on':''}" onclick="kind='offers';V.home()">Offres</button><button class="${kind=='searches'?'on':''}" onclick="kind='searches';V.home()">Recherches</button></div><div class="cta"><button onclick="go('new')">Publier une offre</button><button class="ghost" onclick="go('new')">Publier une recherche</button></div><div id="list" class="stack"><p class="muted">Chargement…</p></div>`);
-const{data,error}=await sb.from(kind).select('*,profiles(id,first_name,last_name,profession,city,avatar_url)').eq('status','active').order('created_at',{ascending:false}).limit(lim);if(error){$('#list').innerHTML=`<div class="empty"><b>Chargement impossible</b><p>Vérifiez votre connexion.</p><button onclick="V.home()">Réessayer</button></div>`;return}items=data||[];list()};
-function list(){const t=q.toLowerCase(),r=items.filter(i=>(i.title+i.description+i.category+(i.location||'')).toLowerCase().includes(t));$('#list').innerHTML=r.length?r.map(card).join('')+(items.length>=lim?`<button class="ghost" onclick="lim+=20;V.home()">Voir plus de publications</button>`:''):`<div class="empty"><b>Rien pour l'instant</b><p>Soyez le premier à publier ${kind=='offers'?'une offre':'une recherche'}.</p></div>`}
-function card(i){const o=kind=='offers',p=i.profiles||{};return `<article class="card ${o?'':'s'}"><div class="who" onclick="prof('${i.author_id}','${i.id}')">${av(p)}<div><b>${esc(name(p))}</b><small>${esc(p.profession||'Professionnel')}${p.city?', '+esc(p.city):''}</small></div><small>${ago(i.created_at)}</small></div><span class="tag">${o?'Offre':'Recherche'} · ${esc(i.category)}</span><h3>${esc(i.title)}</h3><p>${esc(i.description)}</p><footer>${i.location?`<small class="ico">${ic('map-pin')} ${esc(i.location)}</small>`:'<span></span>'}<span>${i.author_id==me.id?'<small>Votre publication</small>':`<button class="ghost sm" onclick="interest('${i.id}')">${o?"Ça m'intéresse":'Je peux aider'}</button><button class="sm" onclick="prof('${i.author_id}','${i.id}')">Voir le profil</button>`}</span></footer></article>`}
-async function interest(id){const{error}=await sb.from('interests').insert({user_id:me.id,[kind=='offers'?'offer_id':'search_id']:id});toast(error?(error.code=='23505'?'Intérêt déjà envoyé.':'Action impossible.'):'Intérêt envoyé à l\'auteur.')}
-async function prof(id,ctx){const{data:p}=await sb.from('profiles').select('*').eq('id',id).single();if(!p)return;
-if(id!=me.id)sb.from('profile_views').insert({profile_id:id,viewer_id:me.id});
-const{data:cr}=await sb.from('contact_requests').select('status').or(`and(sender_id.eq.${me.id},receiver_id.eq.${id}),and(sender_id.eq.${id},receiver_id.eq.${me.id})`).maybeSingle();
-const[{data:of},{data:se}]=await Promise.all([sb.from('offers').select('id,title').eq('author_id',id).eq('status','active').limit(5),sb.from('searches').select('id,title').eq('author_id',id).eq('status','active').limit(5)]);
-const st={pending:'Demande en attente',accepted:'Contact accepté',declined:'Demande refusée'};
-sheet(`<div style="display:flex;gap:1rem;align-items:center">${av(p,'lg')}<div><h2 style="margin:0;font-size:21px">${esc(name(p))}</h2><small>${esc(p.profession||'')}${p.company?' chez '+esc(p.company):''}${p.city?'<br>'+ic('map-pin')+' '+esc(p.city):''}</small></div></div>
-${p.bio?`<p style="margin-top:1rem">${esc(p.bio)}</p>`:''}${(p.activities||[]).length?`<p style="margin-top:.7rem">${p.activities.map(a=>`<span class="tag" style="margin:0 .3rem .3rem 0">${esc(a)}</span>`).join('')}</p>`:''}
-<h4>Publications</h4>${[...(of||[]).map(x=>'Offre : '+x.title),...(se||[]).map(x=>'Recherche : '+x.title)].map(t=>`<div class="row">${esc(t)}</div>`).join('')||'<p class="muted">Aucune publication active.</p>'}
-${id==me.id?'':cr?`<button class="ghost" style="width:100%" disabled>${st[cr.status]}</button>`:`<button style="width:100%;margin-top:.8rem" onclick="reqContact('${id}','${ctx||''}')">Demander un contact</button>`}`)}
-async function reqContact(id,ctx){const o=kind=='offers';const{error}=await sb.from('contact_requests').insert({sender_id:me.id,receiver_id:id,offer_id:ctx&&o?ctx:null,search_id:ctx&&!o?ctx:null});closeSheet();
-toast(!error?'Demande envoyée.':error.code=='23505'?'Demande déjà envoyée.':error.code=='42501'?'Quota atteint : payez 100 FCFA dans Activité pour débloquer 5 mises en contact.':'Envoi impossible.')}
-V.new=()=>{shell(`<h2>Publier</h2><div class="seg"><button id="k1" class="on" onclick="pk('offers')">Une offre</button><button id="k2" onclick="pk('searches')">Une recherche</button></div>
-<label>Titre<input id="t" maxlength="150" placeholder="Ex. Fournisseur de panneaux solaires"></label><label>Catégorie<select id="c">${CATS.map(c=>`<option>${c}</option>`).join('')}</select></label><label>Localisation<input id="l" placeholder="Ville, pays"></label><label>Description<textarea id="d" placeholder="Décrivez précisément votre offre ou votre besoin"></textarea></label><p class="err" id="er"></p><button style="width:100%;margin-top:1rem" onclick="publish()">Publier</button>`)}
-let pkind='offers';function pk(k){pkind=k;$('#k1').className=k=='offers'?'on':'';$('#k2').className=k=='searches'?'on':''}
-async function publish(){const t=$('#t').value.trim(),d=$('#d').value.trim();if(t.length<3||!d){$('#er').textContent='Ajoutez un titre et une description.';return}
-if(publish.b)return;publish.b=1;const{error}=await sb.from(pkind).insert({author_id:me.id,title:t,description:d,category:$('#c').value,location:$('#l').value.trim()||null});publish.b=0;if(error){$('#er').textContent='Publication impossible. Réessayez.';return}toast('Publié.');kind=pkind;go('home')}
-V.contacts=async()=>{shell('<h2>Mes contacts</h2><p class="muted">Chargement…</p>');
-const{data}=await sb.from('contact_requests').select('*,sender:profiles!contact_requests_sender_id_fkey(id,first_name,last_name,profession,avatar_url),receiver:profiles!contact_requests_receiver_id_fkey(id,first_name,last_name,profession,avatar_url)').order('created_at',{ascending:false});const d=data||[];
-const row=(p,sub,acts)=>`<div class="row">${av(p)}<div><b>${esc(name(p))}</b><small>${esc(sub||'')}</small></div><span class="acts">${acts||''}</span></div>`;
-const rec=d.filter(r=>r.status=='pending'&&r.receiver_id==me.id),sent=d.filter(r=>r.status=='pending'&&r.sender_id==me.id),acc=d.filter(r=>r.status=='accepted');
-$('main').innerHTML=`<h2>Mes contacts</h2><h4>Demandes reçues (${rec.length})</h4>${rec.map(r=>row(r.sender,r.sender.profession,`<button class="sm" onclick="resp('${r.id}',true)">Accepter</button><button class="sm bad" onclick="resp('${r.id}',false)">Refuser</button>`)).join('')||'<p class="muted">Aucune demande.</p>'}
-<h4>Demandes envoyées (${sent.length})</h4>${sent.map(r=>row(r.receiver,'En attente de réponse')).join('')||'<p class="muted">Aucune demande en attente.</p>'}
-<h4>Contacts acceptés (${acc.length})</h4>${acc.map(r=>{const o=r.sender_id==me.id?r.receiver:r.sender;return row(o,o.profession,`<button class="sm ghost" onclick="chat('${o.id}')">Discuter</button>`)}).join('')||'<p class="muted">Vos contacts acceptés apparaîtront ici.</p>'}`}
-async function resp(id,a){const{error}=await sb.rpc('respond_contact_request',{p_request_id:id,p_accept:a});if(error)toast(error.message.includes('quota_exhausted')?"Ce membre a épuisé son quota de mises en contact.":'Action impossible.');else toast(a?'Contact accepté.':'Demande refusée.');V.contacts()}
-async function chat(other){let{data:c}=await sb.from('conversations').select('id').or(`and(user_a.eq.${me.id},user_b.eq.${other}),and(user_a.eq.${other},user_b.eq.${me.id})`).order('created_at').limit(1);let id=c&&c[0]?.id;
-if(!id){const r=await sb.rpc('start_conversation',{p_other:other});if(r.error){toast('Discussion impossible.');return}id=r.data}
-const{data:ms}=await sb.from('messages').select('*').eq('conversation_id',id).order('created_at');
-sheet(`<h2 style="font-size:20px">Discussion</h2><div class="msgs" id="ms"></div><div class="send"><input id="mi" placeholder="Votre message" onkeydown="if(event.key=='Enter')sendMsg('${id}')"><button onclick="sendMsg('${id}')">Envoyer</button></div>`);
-const add=m=>{if(document.getElementById('m'+m.id))return;$('#ms').insertAdjacentHTML('beforeend',`<div id="m${m.id}" class="m ${m.sender_id==me.id?'me':''}">${esc(m.body)}<br><small style="opacity:.7">${hm(m.created_at)}</small></div>`);$('#ms').scrollTop=1e9};(ms||[]).forEach(add);
-ch=sb.channel('c'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+id},p=>add(p.new)).subscribe();window._add=add}
-async function sendMsg(id){const i=$('#mi'),b=i.value.trim();if(!b)return;i.value='';const{data,error}=await sb.from('messages').insert({conversation_id:id,sender_id:me.id,body:b}).select().single();if(error)toast('Message non envoyé.');else window._add(data)}
-V.dash=async()=>{shell('<h2>Mon activité</h2><p class="muted">Chargement…</p>');
-let[{data:s},{data:pay}]=await Promise.all([sb.rpc('get_my_stats'),sb.from('payments').select('*').order('created_at',{ascending:false}).limit(8)]);s=s||{};const left=(s.quota_allowed||5)-(s.quota_used||0),pc=Math.min(100,100*(s.quota_used||0)/(s.quota_allowed||5));
-const T=[['profile_views','Visites du profil'],['accepted_contacts','Contacts acceptés'],['offers','Offres publiées'],['searches','Recherches publiées'],['interests_received','Intérêts reçus'],['active_conversations','Discussions actives']];
-$('main').innerHTML=`<h2>Mon activité</h2><div class="quota"><small style="color:#B9C6EA">Mises en contact restantes</small><br><b>${left}</b><div class="bar"><i style="width:${pc}%"></i></div><small style="color:#B9C6EA">${s.quota_used||0} utilisées sur ${s.quota_allowed||5}. Après chaque tranche de 5 contacts acceptés, 100 FCFA débloquent 5 nouvelles mises en contact.</small><button style="width:100%;margin-top:.9rem;background:var(--amber);color:var(--ink)" onclick="pay()">Débloquer 5 contacts : 100 FCFA</button></div>
-<h2 style="font-size:22px;margin-top:1.2rem">Vue d'ensemble</h2><div class="tiles">${T.map(([k,l])=>`<div class="tile"><b>${s[k]||0}</b><small>${l}</small></div>`).join('')}</div><button class="ghost" style="width:100%;margin-top:1rem" onclick="go('mine')">Gérer mes publications</button><h2 style="margin-top:1.4rem;font-size:22px">Mon portefeuille</h2><div class="tiles"><div class="tile"><b>${left}</b><small>Crédits de contact disponibles</small></div><div class="tile"><b>${(pay||[]).filter(p=>p.status=='confirmed').length}</b><small>Paiements confirmés</small></div></div><h4>Historique des paiements</h4>${(pay||[]).map(p=>`<div class="row"><div><b>${p.amount} FCFA</b><small>${ago(p.created_at)}</small></div><small>${{pending:'En attente',confirmed:'Confirmé',failed:'Échoué'}[p.status]}</small></div>`).join('')||'<p class="muted">Aucun paiement.</p>'}`}
-async function pay(){if(pay.b)return;pay.b=1;const{error}=await sb.from('payments').insert({user_id:me.id});pay.b=0;toast(error?'Demande impossible.':'Paiement créé. Il sera confirmé dès réception.');V.dash()}
-V.me=async()=>{const{data:p}=await sb.from('profiles').select('*').eq('id',me.id).single();const f=(k,l,t='input')=>`<label>${l}${t=='ta'?`<textarea id="p_${k}">${esc(p[k])}</textarea>`:`<input id="p_${k}" value="${esc(p[k])}">`}</label>`;
-shell(`<h2>Mon profil</h2><div style="display:flex;gap:1rem;align-items:center">${av(p,'lg')}<div><small>${esc(me.email)}</small><br><button class="ghost sm" style="margin-top:.4rem" onclick="$('#pf').click()">Changer la photo</button><input type="file" id="pf" accept="image/*" hidden onchange="upAv(this)"></div></div>${f('first_name','Prénom')}${f('last_name','Nom')}${f('profession','Profession ou activité')}${f('company','Entreprise (facultatif)')}${f('city','Ville')}${f('bio','Présentation professionnelle','ta')}<label>Domaines d'activité (séparés par des virgules)<input id="p_act" value="${esc((p.activities||[]).join(', '))}"></label>
-<button style="width:100%;margin-top:1.2rem" onclick="saveP()">Enregistrer</button><button class="ghost" style="width:100%;margin-top:.6rem" onclick="go('mine')">Mes publications</button><button class="ghost" style="width:100%;margin-top:.6rem" onclick="sb.auth.signOut()">Se déconnecter</button>`)}
-async function saveP(){const g=k=>$('#p_'+k).value.trim();const{error}=await sb.from('profiles').update({first_name:g('first_name'),last_name:g('last_name'),profession:g('profession')||null,company:g('company')||null,city:g('city')||null,bio:g('bio')||null,activities:$('#p_act').value.split(',').map(x=>x.trim()).filter(Boolean)}).eq('id',me.id);toast(error?'Enregistrement impossible.':'Profil enregistré.')}
-V.notifs=async()=>{shell('<h2>Notifications</h2><p class="muted">Chargement…</p>');const{data}=await sb.from('notifications').select('*').order('created_at',{ascending:false}).limit(40);
-$('main').innerHTML=`<h2>Notifications</h2>${(data||[]).map(n=>`<div class="row" onclick="nav2('${n.type}','${n.link_id||''}')" style="cursor:pointer;${n.is_read?'':'border-left:4px solid var(--blue)'}"><div><b>${esc(n.title)}</b><small>${esc(n.body||'')} · ${ago(n.created_at)}</small></div></div>`).join('')||'<div class="empty"><b>Aucune notification</b></div>'}`;
-await sb.from('notifications').update({is_read:true}).eq('user_id',me.id).eq('is_read',false);const b=$('#nb');if(b)b.hidden=true}
-V.mine=async()=>{shell('<h2>Mes publications</h2><p class="muted">Chargement…</p>');
-const[a,b]=await Promise.all(['offers','searches'].map(t=>sb.from(t).select('*,interests(count)').eq('author_id',me.id).neq('status','deleted').order('created_at',{ascending:false})));
-const all=[...(a.data||[]).map(x=>({...x,t:'offers'})),...(b.data||[]).map(x=>({...x,t:'searches'}))].sort((x,y)=>y.created_at.localeCompare(x.created_at));
-$('main').innerHTML=`<h2>Mes publications</h2><div class="stack">${all.map(x=>{const n=x.interests?.[0]?.count||0,act=x.status=='active',sus=x.status=='suspended';return `<article class="card ${x.t=='offers'?'':'s'}"><span class="tag">${x.t=='offers'?'Offre':'Recherche'} · ${STX[x.status]||x.status}</span><h3>${esc(x.title)}</h3><small>${ago(x.created_at)} · ${n} intéressé(s)</small><footer><span>${sus?'<small>Suspendue par DropAffy</small>':`<button class="ghost sm" onclick="editPub('${x.t}','${x.id}')">Modifier</button><button class="ghost sm" onclick="setSt('${x.t}','${x.id}','${act?'closed':'active'}')">${act?'Clôturer':'Renouveler'}</button>`}<button class="sm bad" onclick="delPub('${x.t}','${x.id}')">Supprimer</button></span>${n?`<button class="sm" onclick="who('${x.t}','${x.id}')">Voir les intéressés</button>`:''}</footer></article>`}).join('')||'<div class="empty"><b>Aucune publication</b><p>Publiez votre première offre ou recherche.</p><button onclick="go(\'new\')">Publier</button></div>'}</div>`};
-async function setSt(t,id,st){const{error}=await sb.from(t).update({status:st}).eq('id',id);toast(error?'Action impossible.':st=='active'?'Publication renouvelée.':'Publication clôturée.');V.mine()}
-async function delPub(t,id){if(!confirm('Supprimer cette publication ?'))return;const{error}=await sb.from(t).update({status:'deleted'}).eq('id',id);toast(error?'Suppression impossible.':'Publication supprimée.');V.mine()}
-async function editPub(t,id){const{data:x}=await sb.from(t).select('*').eq('id',id).single();sheet(`<h2 style="font-size:22px">Modifier</h2><label>Titre<input id="et" value="${esc(x.title)}"></label><label>Catégorie<select id="ec">${CATS.map(c=>`<option ${c==x.category?'selected':''}>${c}</option>`).join('')}</select></label><label>Localisation<input id="el" value="${esc(x.location)}"></label><label>Description<textarea id="ed">${esc(x.description)}</textarea></label><button id="sv" style="width:100%;margin-top:1rem" onclick="saveEdit('${t}','${id}')">Enregistrer</button>`)}
-async function saveEdit(t,id){const b=$('#sv');b.disabled=true;const{error}=await sb.from(t).update({title:$('#et').value.trim(),category:$('#ec').value,location:$('#el').value.trim()||null,description:$('#ed').value.trim()}).eq('id',id);b.disabled=false;if(error){toast('Enregistrement impossible.');return}closeSheet();toast('Publication modifiée.');V.mine()}
-async function who(t,id){kind=t;const{data}=await sb.from('interests').select('created_at,profiles!interests_user_id_fkey(id,first_name,last_name,profession,avatar_url)').eq(t=='offers'?'offer_id':'search_id',id).order('created_at',{ascending:false});sheet(`<h2 style="font-size:22px">Personnes intéressées</h2>${(data||[]).map(r=>`<div class="row" onclick="prof('${r.profiles.id}','${id}')" style="cursor:pointer">${av(r.profiles)}<div><b>${esc(name(r.profiles))}</b><small>${esc(r.profiles.profession||'')} · ${ago(r.created_at)}</small></div></div>`).join('')||'<p class="muted">Aucun intérêt pour le moment.</p>'}`)}
-async function upAv(i){const f=i.files[0];if(!f)return;if(f.size>3e6){toast('Image trop lourde (3 Mo maximum).');return}const path=`${me.id}/avatar-${Date.now()}.jpg`;const{error}=await sb.storage.from('avatars').upload(path,f,{contentType:f.type});if(error){toast('Envoi de la photo impossible.');return}await sb.from('profiles').update({avatar_url:sb.storage.from('avatars').getPublicUrl(path).data.publicUrl}).eq('id',me.id);toast('Photo mise à jour.');V.me()}
-async function openConv(cid){const{data:c}=await sb.from('conversations').select('user_a,user_b').eq('id',cid).single();if(c)chat(c.user_a==me.id?c.user_b:c.user_a)}
-function nav2(t,id){if(t=='contact_request'||t=='contact_declined'||t=='contact_accepted')go('contacts');else if(t=='message'&&id)openConv(id);else if(t=='interest')go('mine');else if(t=='payment'||t=='quota')go('dash')}
-/* ---------- BOOT ---------- */
-sb.auth.onAuthStateChange((_e,s)=>{if(_e=='PASSWORD_RECOVERY'){recov();return}const u=s?.user||null;if(window._rec){me=u;return}if((u&&u.id)!==(me&&me.id)){me=u;me?go('home'):authView()}});
-sb.auth.getSession().then(({data})=>{if(!data.session)authView()});
-</script></body></html>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      font-size: var(--font-size-body);
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding-bottom: 75px; /* Espace pour la navigation fixe mobile */
+    }
+
+    /* En-tête / Logo */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: var(--font-size-logo);
+      font-weight: 800;
+      color: var(--primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-mini-profile {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--font-size-meta);
+      color: var(--text-muted);
+    }
+
+    /* Conteneur principal */
+    main {
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Vues (Sections) */
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+    }
+
+    /* Titres */
+    h1 {
+      font-size: var(--font-size-h1);
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: var(--font-size-h2);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    /* Boutons et Interactions (Hauteur min 46px, Tactile min 44x44px) */
+    button, .btn {
+      min-height: var(--touch-min-height);
+      min-width: var(--touch-min-size);
+      padding: 10px 18px;
+      font-size: var(--font-size-btn);
+      font-weight: 600;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background-color: #e2e8f0;
+      color: var(--text-main);
+    }
+
+    /* Formulaires & Champs */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: var(--font-size-meta);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input, textarea, select {
+      width: 100%;
+      min-height: var(--touch-min-height);
+      padding: 10px 14px;
+      font-size: var(--font-size-body);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: white;
+      color: var(--text-main);
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    /* Cartes de Publication (Lisibilité optimisée) */
+    .publication-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .author-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      object-fit: cover;
+    }
+
+    .author-info h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .author-info p {
+      font-size: var(--font-size-meta);
+      color: var(--text-muted);
+    }
+
+    .card-category {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      background: #eff6ff;
+      color: var(--primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: var(--font-size-card-title);
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .card-desc {
+      font-size: var(--font-size-body);
+      color: #334155;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+    }
+
+    /* Navigation Inférieure Mobile */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65px;
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 500;
+      min-width: 44px;
+      min-height: 44px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-publish-btn {
+      background: var(--primary);
+      color: white;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -18px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Adaptation Desktop */
+    @media (min-width: 768px) {
+      body {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-bottom: 0;
+        box-shadow: 0 0 25px rgba(0,0,0,0.05);
+      }
+      .bottom-nav {
+        max-width: 1200px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- En-tête -->
+  <header>
+    <a href="#" class="logo">
+      <i data-lucide="layers" style="width: 26px; height: 26px;"></i> DropAffy
+    </a>
+    <div id="auth-header-status" class="user-mini-profile">
+      <span>Chargement...</span>
+    </div>
+  </header>
+
+  <!-- Contenu Principal -->
+  <main>
+    <!-- 1. ACCUEIL -->
+    <section id="view-home" class="view-section active">
+      <h1>Fil d'actualité</h1>
+      <p style="font-size: var(--font-size-meta); color: var(--text-muted); margin-bottom: 16px; font-style: italic;">
+        « Vos publications créent vos opportunités. »
+      </p>
+
+      <div class="form-group">
+        <input type="text" id="search-input" placeholder="Rechercher par titre, description, ville...">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+        <button class="btn btn-primary" onclick="filterFeed('all')" style="min-height: 40px; padding: 6px 14px;">Tout</button>
+        <button class="btn btn-secondary" onclick="filterFeed('offre')" style="min-height: 40px; padding: 6px 14px;">Offres</button>
+        <button class="btn btn-secondary" onclick="filterFeed('recherche')" style="min-height: 40px; padding: 6px 14px;">Recherches</button>
+      </div>
+
+      <div id="feed-container">
+        <!-- Les publications seront chargées dynamiquement ici -->
+        <p style="text-align: center; color: var(--text-muted); padding: 20px;">Chargement des publications...</p>
+      </div>
+    </section>
+
+    <!-- 2. PUBLIER -->
+    <section id="view-publish" class="view-section">
+      <h1>Nouvelle Publication</h1>
+      <form id="publish-form" onsubmit="handlePublish(event)">
+        <div class="form-group">
+          <label for="pub-type">Type de publication</label>
+          <select id="pub-type" required>
+            <option value="offre">Offre (Produit, Service, Opportunité)</option>
+            <option value="recherche">Recherche (Besoin, Partenaire, Prestation)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="pub-category">Catégorie</label>
+          <input type="text" id="pub-category" placeholder="Ex: Commerce, Logistique, Tech..." required>
+        </div>
+
+        <div class="form-group">
+          <label for="pub-title">Titre de l'annonce</label>
+          <input type="text" id="pub-title" placeholder="Ex: Fournisseur de textiles en gros à Abidjan" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pub-location">Localisation (Ville / Pays)</label>
+          <input type="text" id="pub-location" placeholder="Ex: Abidjan, Côte d'Ivoire" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pub-desc">Description détaillée</label>
+          <textarea id="pub-desc" placeholder="Décrivez clairement votre offre ou votre recherche..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Publier l'opportunité</button>
+      </form>
+    </section>
+
+    <!-- 3. CONTACTS -->
+    <section id="view-contacts" class="view-section">
+      <h1>Mes Contacts & Demandes</h1>
+      <div id="contacts-container">
+        <p style="color: var(--text-muted);">Vos relations professionnelles validées apparaîtront ici.</p>
+      </div>
+    </section>
+
+    <!-- 4. ACTIVITÉ (Tableau de bord professionnel) -->
+    <section id="view-activity" class="view-section">
+      <h1>Espace Professionnel</h1>
+      <div style="background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+        <h2>Vue d'ensemble</h2>
+        <p style="color: var(--text-muted); font-size: var(--font-size-meta);">Suivi de vos performances et de votre portefeuille.</p>
+      </div>
+      <h2>Mes Publications Actives</h2>
+      <div id="my-publications-container">
+        <p style="color: var(--text-muted);">Chargement de vos publications...</p>
+      </div>
+    </section>
+
+    <!-- 5. PROFIL -->
+    <section id="view-profile" class="view-section">
+      <h1>Mon Profil Professionnel</h1>
+      <div id="profile-container">
+        <p style="color: var(--text-muted);">Chargement du profil...</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Navigation Inférieure (Mobile First fixe) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchView('home', this)">
+      <i data-lucide="home" style="width: 24px; height: 24px;"></i>
+      <span>Accueil</span>
+    </button>
+    <button class="nav-item" onclick="switchView('contacts', this)">
+      <i data-lucide="users" style="width: 24px; height: 24px;"></i>
+      <span>Contacts</span>
+    </button>
+    <button class="nav-publish-btn" onclick="switchView('publish', this)" title="Publier">
+      <i data-lucide="plus" style="width: 28px; height: 28px;"></i>
+    </button>
+    <button class="nav-item" onclick="switchView('activity', this)">
+      <i data-lucide="bar-chart-2" style="width: 24px; height: 24px;"></i>
+      <span>Activité</span>
+    </button>
+    <button class="nav-item" onclick="switchView('profile', this)">
+      <i data-lucide="user" style="width: 24px; height: 24px;"></i>
+      <span>Profil</span>
+    </button>
+  </nav>
+
+  <!-- Script d'initialisation et logique application -->
+  <script>
+    // Initialisation des icônes Lucide
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+    });
+
+    // Configuration Supabase (À adapter avec vos clés du projet existant)
+    const SUPABASE_URL = 'VOTRE_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'VOTRE_SUPABASE_ANON_KEY';
+    
+    // Initialisation sécurisée du client Supabase si configuré
+    let supabaseClient = null;
+    try {
+      if (SUPABASE_URL !== 'VOTRE_SUPABASE_URL') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch (e) {
+      console.error("Erreur d'initialisation Supabase", e);
+    }
+
+    // Navigation entre les vues
+    function switchView(viewName, element) {
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(`view-${viewName}`).classList.add('active');
+
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(item => item.classList.remove('active'));
+      if (element && element.classList.contains('nav-item')) {
+        element.classList.add('active');
+      }
+      window.scrollTo(0, 0);
+    }
+
+    // Gestion de la publication (Simulation / Connexion Supabase)
+    async function handlePublish(event) {
+      event.preventDefault();
+      const type = document.getElementById('pub-type').value;
+      const category = document.getElementById('pub-category').value;
+      const title = document.getElementById('pub-title').value;
+      const location = document.getElementById('pub-location').value;
+      const description = document.getElementById('pub-desc').value;
+
+      if (!supabaseClient) {
+        alert("Veuillez configurer vos identifiants Supabase dans le script pour enregistrer la publication.");
+        return;
+      }
+
+      try {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+          alert("Vous devez être connecté pour publier.");
+          return;
+        }
+
+        const tableName = type === 'offre' ? 'offers' : 'searches';
+        const { error } = await supabaseClient.from(tableName).insert([
+          { title, description, category, location, author_id: user.id, status: 'active' }
+        ]);
+
+        if (error) throw error;
+
+        alert("Publication enregistrée avec succès !");
+        document.getElementById('publish-form').reset();
+        switchView('home', document.querySelector('.bottom-nav .nav-item'));
+        loadFeed();
+      } catch (err) {
+        alert("Erreur lors de la publication : " + err.message);
+      }
+    }
+
+    // Chargement du fil d'actualité
+    async function loadFeed() {
+      const container = document.getElementById('feed-container');
+      container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px;">Chargement des publications...</p>`;
+
+      if (!supabaseClient) {
+        container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px;">Mode démonstration : Connectez Supabase pour afficher le fil réel.</p>`;
+        return;
+      }
+
+      // Exemple de récupération combinée ou unifiée
+      try {
+        const { data, error } = await supabaseClient.from('offers').select('*, profiles(full_name, profession, city)').eq('status', 'active');
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 20px;">Aucune publication disponible pour le moment.</p>`;
+          return;
+        }
+
+        container.innerHTML = data.map(pub => `
+          <div class="publication-card">
+            <div class="card-header">
+              <div class="author-avatar" style="background:#cbd5e1; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#475569;">
+                ${pub.profiles?.full_name ? pub.profiles.full_name.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div class="author-info">
+                <h4>${pub.profiles?.full_name || 'Membre DropAffy'}</h4>
+                <p>${pub.profiles?.profession || 'Professionnel'} • ${pub.location || 'Afrique de l\'Ouest'}</p>
+              </div>
+            </div>
+            <span class="card-category">${pub.category || 'Général'}</span>
+            <div class="card-title">${pub.title}</div>
+            <div class="card-desc">${pub.description}</div>
+            <div class="card-actions">
+              <button class="btn btn-primary" style="flex:1; min-height:40px; font-size:14px;" onclick="expressInterest('${pub.id}')">
+                <i data-lucide="star" style="width:18px;height:18px;"></i> Intéressé(e)
+              </button>
+              <button class="btn btn-secondary" style="flex:1; min-height:40px; font-size:14px;" onclick="requestContact('${pub.author_id}')">
+                <i data-lucide="user-plus" style="width:18px;height:18px;"></i> Demander contact
+              </button>
+            </div>
+          </div>
+        `).join('');
+        lucide.createIcons();
+      } catch (err) {
+        container.innerHTML = `<p style="text-align: center; color: #ef4444; padding: 20px;">Erreur de chargement des données.</p>`;
+      }
+    }
+
+    function filterFeed(category) {
+      // Logique de filtrage par catégorie
+      loadFeed();
+    }
+
+    function expressInterest(id) {
+      alert("Intérêt enregistré. L'auteur a été notifié.");
+    }
+
+    function requestContact(authorId) {
+      alert("Demande de contact transmise selon les règles de gouvernance DropAffy.");
+    }
+
+    // Lancement au chargement de la page
+    window.onload = () => {
+      loadFeed();
+    };
+  </script>
+</body>
+  </html>
