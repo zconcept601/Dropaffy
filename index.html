@@ -2,6 +2,13 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0B1F4B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DropAffy">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>DropAffy</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -75,7 +82,7 @@ const ic=(n,c='')=>`<i data-lucide="${n}" class="${c}"></i>`;
 const SK='<div class="sk"></div><div class="sk"></div><div class="sk"></div>';
 const CATS=['Produits','Services','Prestations','Opportunités commerciales','Fournisseurs','Partenaires','Immobilier','Emploi','Transport et livraison','Autre'];
 const errFr=e=>{const m=(e?.message||'').toLowerCase();return m.includes('invalid login')?'E-mail ou mot de passe incorrect.':m.includes('not confirmed')?"Confirmez d'abord votre adresse e-mail.":m.includes('already registered')?'Un compte existe déjà avec cet e-mail.':m.includes('at least')?'Mot de passe trop court (6 caractères minimum).':m.includes('rate')||m.includes('seconds')?'Trop de tentatives. Réessayez dans quelques minutes.':m.includes('valid email')||m.includes('invalid format')?'Adresse e-mail invalide.':m.includes('fetch')||m.includes('network')?'Connexion Internet instable. Réessayez.':'Une erreur est survenue. Réessayez.'};
-let nch=null,adm=false,pim=[],me=null,view='home',kind='offers',q='',items=[],page=0,more=false,mine=new Set(),ch=null,authMode='in',dtab='over',rec=0,tm,lt;
+let ip=null,nch=null,adm=false,pim=[],me=null,view='home',kind='offers',q='',items=[],page=0,more=false,mine=new Set(),ch=null,authMode='in',dtab='over',rec=0,tm,lt;
 new MutationObserver(()=>{clearTimeout(lt);lt=setTimeout(()=>window.lucide&&lucide.createIcons(),0)}).observe(document.body,{childList:true,subtree:true});
 async function once(b,f){if(b.disabled)return;b.disabled=true;try{await f()}finally{b.disabled=false}}
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3800)}
@@ -192,7 +199,7 @@ async function pay(){const{error}=await sb.from('payments').insert({user_id:me.i
 /* ---------- PROFIL ---------- */
 V.me=async()=>{const{data:p}=await sb.from('profiles').select('*').eq('id',me.id).single();const{data:pp}=await sb.from('profile_private').select('*').eq('user_id',me.id).maybeSingle();if(!p){shell('<div class="empty"><b>Profil indisponible</b></div>');return}
 const f=(k,l,t)=>`<label>${l}${t=='ta'?`<textarea id="p_${k}">${esc(p[k])}</textarea>`:`<input id="p_${k}" value="${esc(p[k])}">`}</label>`;
-shell(`<h2>Mon profil</h2><div style="display:flex;gap:1rem;align-items:center">${av(p,'lg')}<div><small>${esc(me.email)}</small><br><label class="ghost" style="display:inline-flex;margin:.4rem 0 0;padding:.6rem 1rem;border-radius:11px;background:var(--sky);color:var(--blue);cursor:pointer;align-items:center;gap:.4rem">${ic('camera')}Changer la photo<input type="file" accept="image/*" hidden onchange="upAv(this)"></label></div></div>${f('first_name','Prénom')}${f('last_name','Nom')}${f('profession','Profession ou activité')}${f('company','Entreprise (facultatif)')}${f('city','Ville')}<label>Numéro WhatsApp<input id="p_wa" type="tel" inputmode="tel" placeholder="+226 70 00 00 00" value="${esc(pp?.whatsapp)}"></label><label>Numéro Orange Money<input id="p_om" type="tel" inputmode="tel" placeholder="+226 70 00 00 00" value="${esc(pp?.orange_money)}"></label><small>Ces numéros sont privés. Votre WhatsApp n'est communiqué qu'aux contacts que vous avez acceptés.</small>${f('bio','Présentation professionnelle','ta')}<label>Domaines d'activité (séparés par des virgules)<input id="p_act" value="${esc((p.activities||[]).join(', '))}"></label>
+shell(`<h2>Mon profil</h2>${instCard()}<div style="display:flex;gap:1rem;align-items:center">${av(p,'lg')}<div><small>${esc(me.email)}</small><br><label class="ghost" style="display:inline-flex;margin:.4rem 0 0;padding:.6rem 1rem;border-radius:11px;background:var(--sky);color:var(--blue);cursor:pointer;align-items:center;gap:.4rem">${ic('camera')}Changer la photo<input type="file" accept="image/*" hidden onchange="upAv(this)"></label></div></div>${f('first_name','Prénom')}${f('last_name','Nom')}${f('profession','Profession ou activité')}${f('company','Entreprise (facultatif)')}${f('city','Ville')}<label>Numéro WhatsApp<input id="p_wa" type="tel" inputmode="tel" placeholder="+226 70 00 00 00" value="${esc(pp?.whatsapp)}"></label><label>Numéro Orange Money<input id="p_om" type="tel" inputmode="tel" placeholder="+226 70 00 00 00" value="${esc(pp?.orange_money)}"></label><small>Ces numéros sont privés. Votre WhatsApp n'est communiqué qu'aux contacts que vous avez acceptés.</small>${f('bio','Présentation professionnelle','ta')}<label>Domaines d'activité (séparés par des virgules)<input id="p_act" value="${esc((p.activities||[]).join(', '))}"></label>
 <button style="width:100%;margin-top:1.3rem" onclick="once(this,saveP)">Enregistrer</button><button class="ghost" style="width:100%;margin-top:.7rem" onclick="sb.auth.signOut()">${ic('log-out')}Se déconnecter</button>`)}
 async function upAv(i){const f=i.files[0];if(!f)return;if(f.size>3e6){toast('Image trop lourde (3 Mo maximum).');return}
 const path=`${me.id}/avatar-${Date.now()}.${(f.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')}`;
@@ -209,6 +216,8 @@ if(error){$('main').innerHTML='<h2>Notifications</h2><div class="empty"><b>Charg
 $('main').innerHTML=`<h2>Notifications</h2>${pushCard()}${(data||[]).map(n=>`<div class="row c ${n.is_read?'':'u'}" onclick="openN('${n.type}','${n.link_id||''}')">${ic(NI[n.type]||'bell')}<div><b>${esc(n.title)}</b><small>${esc(n.body||'')} · ${ago(n.created_at)}</small></div></div>`).join('')||'<div class="empty"><b>Aucune notification</b></div>'}`;
 await sb.from('notifications').update({is_read:true}).eq('user_id',me.id).eq('is_read',false);const b=$('#nb');if(b)b.hidden=true}
 function pushCard(){if(!('Notification' in window)||!('serviceWorker' in navigator)||!('PushManager' in window))return '';const p=Notification.permission;return `<div class="row" style="background:var(--sky);flex-wrap:wrap">${ic('bell-ring')}<div><b>Notifications sur ce téléphone</b><small>${p=='granted'?'Activées. Vous êtes prévenu même quand DropAffy est fermé.':p=='denied'?'Bloquées. Autorisez-les dans les réglages du navigateur.':'Recevez les alertes même quand DropAffy est fermé.'}</small></div>${p=='denied'?'':`<span class="acts"><button class="sm" onclick="once(this,pushOn)">${p=='granted'?'Réactiver':'Activer'}</button>${p=='granted'?`<button class="sm ghost" onclick="once(this,pushOff)">Désactiver</button><button class="sm ghost" onclick="once(this,pushTest)">Tester</button>`:''}</span>`}</div>`}
+function instCard(){if(matchMedia('(display-mode: standalone)').matches||navigator.standalone)return '';const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);if(!ip&&!ios)return '';return `<div class="row" style="background:var(--sky);flex-wrap:wrap">${ic('smartphone')}<div><b>Installer DropAffy</b><small>${ip?"Ajoutez l'application à votre écran d'accueil.":"Touchez Partager, puis « Sur l'écran d'accueil »."}</small></div>${ip?`<button class="sm" onclick="once(this,instApp)">Installer</button>`:''}</div>`}
+async function instApp(){if(!ip)return;ip.prompt();await ip.userChoice;ip=null;V.me()}
 async function pushOn(){try{const m=await import('./push.js'),r=await m.enablePush(sb);toast(r.ok?'Notifications activées sur ce téléphone.':r.reason=='denied'?'Notifications refusées. Autorisez-les dans les réglages du navigateur.':r.reason=='unsupported'?'Ce navigateur ne prend pas en charge les notifications.':'Activation impossible. Réessayez.')}catch(e){toast('Activation impossible. Réessayez.')}V.notifs()}
 async function pushTest(){const{error}=await sb.rpc('send_test_push');toast(error?(error.message.includes('Patientez')?'Patientez quelques secondes.':'Test impossible.'):'Test envoyé. La notification arrive dans quelques secondes.')}
 async function pushOff(){try{const m=await import('./push.js');await m.disablePush(sb);toast('Notifications désactivées sur ce téléphone.')}catch(e){toast('Désactivation impossible.')}V.notifs()}
@@ -235,6 +244,8 @@ async function payAct(id,ok){const{error}=await sb.rpc(ok?'admin_confirm_payment
 async function moder(k,id,st){const{error}=await sb.from(k).update({status:st}).eq('id',id);toast(error?'Action impossible.':st=='active'?'Publication validée.':'Publication refusée.');valid()}
 /* ---------- DÉMARRAGE ---------- */
 sb.auth.onAuthStateChange((ev,s)=>{const u=s?.user||null;if(ev=='PASSWORD_RECOVERY'){me=u;rec=1;recView();return}if(rec)return;if((u&&u.id)!==(me&&me.id)){me=u;me?start():authView()}});
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(view=='me')V.me()});addEventListener('appinstalled',()=>{ip=null;toast('DropAffy est installé.')});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 navigator.serviceWorker?.addEventListener('message',ev=>{const d=ev.data;if(d&&d.type=='notif'&&me&&d.t)openN(d.t,d.id||'')});
 sb.auth.getSession().then(({data})=>{if(!data.session)authView()});
 </script></body></html>
