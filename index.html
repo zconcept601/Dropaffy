@@ -76,6 +76,17 @@ main.anim :is(.stack,.tiles)>:nth-child(2){animation-delay:.06s}main.anim :is(.s
 .card,.tile{transition:transform .15s,box-shadow .15s}.card:active,.tile:active{transform:scale(.985)}
 nav button span{transition:transform .2s}nav button.on span{transform:translateY(-2px) scale(1.1)}
 @media (prefers-reduced-motion:reduce){#nbar,main,main *{animation:none!important;transition:none!important}}
+.hb{display:flex;gap:.4rem;align-items:center}
+body{font-size:14.5px}h2{font-size:23px}h4{font-size:13.5px}
+button{min-height:40px;font-size:14px;padding:.4rem 1rem;border-radius:11px}
+button.sm{min-height:36px;font-size:13px;padding:.3rem .75rem;border-radius:10px}
+svg.lucide{width:18px;height:18px}
+input,select,textarea{min-height:42px;padding:.6rem .8rem;border-radius:11px}
+label{font-size:13.5px}
+.logo{font-size:21px}.bell{width:40px;min-height:40px}.bell em{font-size:11px;min-width:18px;height:18px}
+nav button{min-height:54px;font-size:11.5px}
+.tag{font-size:12.5px}.card p{font-size:14.5px}.who b,.row b{font-size:15px}.m{font-size:14.5px}
+.av{width:42px;height:42px;font-size:15px}.tile b{font-size:26px}
 </style><link rel="preconnect" href="https://fodmqtpaxygjoimuvvaw.supabase.co" crossorigin></head><body>
 <div id="app"></div><div id="sheet" onclick="if(event.target==this)closeSheet()"></div><div id="toast" role="status"></div>
 <script>
@@ -98,7 +109,7 @@ async function once(b,f){if(b.disabled)return;b.disabled=true;try{await f()}fina
 function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',3800)}
 function sheet(h){const s=$('#sheet');s.innerHTML=`<div class="panel">${h}</div>`;s.classList.add('on')}
 function closeSheet(){$('#sheet').classList.remove('on');if(ch){sb.removeChannel(ch);ch=null}}
-function shell0(inner){app.innerHTML=`<header><b class="logo">Drop<i>Affy</i></b><button class="bell" onclick="go('notifs')" aria-label="Notifications">${ic('bell')}<em id="nb" hidden></em></button></header><main>${inner}</main><nav>${[['home','Accueil','house'],['new','Publier','plus'],['contacts','Contacts','users'],['dash','Activité','layout-dashboard'],['me','Profil','user']].map(([k,l,i])=>`<button class="${view==k?'on':''} ${k=='new'?'pub':''}" data-k="${k}" onclick="go('${k}')"><span>${ic(i)}</span>${l}</button>`).join('')}</nav>`;badge()}
+function shell0(inner){app.innerHTML=`<header><b class="logo">Drop<i>Affy</i></b><span class="hb"><button class="bell" onclick="convList()" aria-label="Messages">${ic('message-circle')}</button><button class="bell" onclick="go('notifs')" aria-label="Notifications">${ic('bell')}<em id="nb" hidden></em></button></span></header><main>${inner}</main><nav>${[['home','Accueil','house'],['new','Publier','plus'],['contacts','Contacts','users'],['dash','Activité','layout-dashboard'],['me','Profil','user']].map(([k,l,i])=>`<button class="${view==k?'on':''} ${k=='new'?'pub':''}" data-k="${k}" onclick="go('${k}')"><span>${ic(i)}</span>${l}</button>`).join('')}</nav>`;badge()}
 async function badge(){const{count}=await sb.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',me.id).eq('is_read',false);const b=$('#nb');if(b&&count){b.hidden=false;b.textContent=count>99?'99+':count}}
 function go(v){view=v;scrollTo(0,0);bar(1);V[v]()}
 const Q={price:'Le prix est-il négociable ?',commission:'Puis-je avoir une commission ?',supply:'Je peux fournir ce produit',details:'Pouvez-vous préciser la quantité et le budget ?'},AB={yes:'Oui',slight:'Légèrement',no:'Non',contact:'À voir en mise en contact',discuss:'À discuter',not_now:"Pas pour l'instant"},AO={price:['yes','slight','no','contact'],commission:['yes','discuss','no'],supply:['yes','not_now','contact'],details:['contact','not_now']};
@@ -171,9 +182,9 @@ async function resp(id,a){const{error}=await sb.rpc('respond_contact_request',{p
 /* ---------- MESSAGERIE ---------- */
 async function chat(other){const[{data:o},{data:c}]=await Promise.all([sb.from('profiles').select('id,first_name,last_name,profession,avatar_url').eq('id',other).single(),sb.from('conversations').select('id').or(`and(user_a.eq.${me.id},user_b.eq.${other}),and(user_a.eq.${other},user_b.eq.${me.id})`).order('created_at').limit(1)]);
 let id=c&&c[0]?.id;if(!id){const r=await sb.rpc('start_conversation',{p_other:other});if(r.error){toast('Discussion impossible.');return}id=r.data}
-sheet(`<div class="row" style="padding:0;background:none">${av(o)}<div><b>${esc(name(o))}</b><small>${esc(o?.profession||'')}</small></div></div><div id="oldb"></div><div class="msgs" id="ms"><small>Chargement…</small></div><div class="send"><input id="mi" placeholder="Votre message" maxlength="4000" onkeydown="if(event.key=='Enter')sendMsg('${id}')"><button onclick="once(this,()=>sendMsg('${id}'))" aria-label="Envoyer">${ic('send')}</button></div>`);
+sheet(`<div class="row" style="padding:0;background:none">${av(o)}<div><b>${esc(name(o))}</b><small>${esc(o?.profession||'')}</small></div></div><small class="muted">Les messages sont supprimés après 48 h.</small><div id="oldb"></div><div class="msgs" id="ms"><small>Chargement…</small></div><div class="send"><input id="mi" placeholder="Votre message" maxlength="4000" onkeydown="if(event.key=='Enter')sendMsg('${id}')"><button onclick="once(this,()=>sendMsg('${id}'))" aria-label="Envoyer">${ic('send')}</button></div>`);
 await older(id);ch=sb.channel('c'+id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:'conversation_id=eq.'+id},p=>bub(p.new)).subscribe()}
-async function older(id,before){let r=sb.from('messages').select('*').eq('conversation_id',id).order('created_at',{ascending:false}).limit(40);if(before)r=r.lt('created_at',before);const{data,error}=await r,ms=$('#ms');if(!ms)return;
+async function older(id,before){let r=sb.from('messages').select('*').eq('conversation_id',id).gt('created_at',new Date(Date.now()-48*36e5).toISOString()).order('created_at',{ascending:false}).limit(40);if(before)r=r.lt('created_at',before);const{data,error}=await r,ms=$('#ms');if(!ms)return;
 if(error){ms.innerHTML='<small>Messages indisponibles. Fermez puis rouvrez la discussion.</small>';return}
 if(!before)ms.innerHTML=data.length?'':'<small id="nom">Aucun message. Écrivez le premier.</small>';
 if(before)data.forEach(m=>bub(m,1));else[...data].reverse().forEach(m=>bub(m));
@@ -183,7 +194,7 @@ async function sendMsg(id){const i=$('#mi'),b=i.value.trim();if(!b)return;i.valu
 async function chatConv(id){const{data:c}=await sb.from('conversations').select('user_a,user_b').eq('id',id).single();if(!c){toast('Conversation introuvable.');return}chat(c.user_a==me.id?c.user_b:c.user_a)}
 /* ---------- ACTIVITÉ ---------- */
 V.dash=()=>{shell(`<h2>Mon activité</h2><div class="seg s3" style="grid-template-columns:repeat(${adm?(arole=='owner'?5:4):3},1fr)">${[['over','Vue d\'ensemble'],['pubs','Publications'],['wal','Portefeuille'],...(adm?[['valid','Validation']]:[]),...(arole=='owner'?[['team','Équipe']]:[])].map(([k,l])=>`<button class="${dtab==k?'on':''}" onclick="dtab='${k}';V.dash()">${l}</button>`).join('')}</div><div id="dc">${SK}</div>`);({over,pubs,wal,valid,team})[dtab]()};
-async function over(){const{data:s}=await sb.rpc('get_my_stats'),S=s||{};const T=[['profile_views','Visites du profil','eye'],['offers','Offres publiées','tag'],['searches','Recherches publiées','search'],['interests_received','Intérêts reçus','heart'],['accepted_contacts','Contacts acceptés','user-check'],['active_conversations','Discussions actives','message-circle']];
+async function over(){const{data:s}=await sb.rpc('get_my_stats'),S=s||{};const T=[['offers','Offres publiées','tag'],['searches','Recherches publiées','search'],['accepted_contacts','Contacts acceptés','user-check'],['active_conversations','Discussions actives','message-circle']];
 $('#dc').innerHTML=`<div class="tiles">${T.map(([k,l,i])=>`<div class="tile">${ic(i)}<b>${S[k]||0}</b><small>${l}</small></div>`).join('')}</div>`}
 const SL={pending:'En attente de validation',rejected:'Refusée',active:'Active',closed:'Clôturée',expired:'Expirée',suspended:'Suspendue'};
 async function pubs(){const[{data:o},{data:s}]=await Promise.all([sb.from('offers').select('*').eq('author_id',me.id).neq('status','deleted'),sb.from('searches').select('*').eq('author_id',me.id).neq('status','deleted')]);
@@ -315,6 +326,15 @@ function shell(inner){
  lastV=view}
 function countUp(b){b.dataset.c=1;const t=b.textContent.trim();if(!/^\d+$/.test(t)||+t<2)return;const n=+t,s0=performance.now();(function f(now){const p=Math.min((now-s0)/600,1);b.textContent=Math.round(n*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(f)})(s0)}
 new MutationObserver(()=>{const m=app.querySelector('main');if(!m)return;m.querySelectorAll('.tile b:not([data-c])').forEach(countUp);if(!m.querySelector('.sk')){bar(0);clearTimeout(ct);ct=setTimeout(()=>{if(!m.querySelector('.sk'))NC[ckey()]=m.innerHTML},400)}}).observe(app,{childList:true,subtree:true});
+
+/* ---------- LISTE DES DISCUSSIONS (icône du haut) ---------- */
+async function convList(){
+ sheet(`<h3>Messages</h3>${SK}`);
+ const{data:cs}=await sb.from('conversations').select('id,user_a,user_b,created_at').or(`user_a.eq.${me.id},user_b.eq.${me.id}`).order('created_at',{ascending:false});
+ const ids=(cs||[]).map(c=>c.user_a==me.id?c.user_b:c.user_a);
+ const{data:ps}=ids.length?await sb.from('profiles').select('id,first_name,last_name,profession,avatar_url').in('id',ids):{data:[]};
+ const pm=Object.fromEntries((ps||[]).map(x=>[x.id,x]));
+ sheet(`<h3>Messages</h3><p class="muted">Les messages sont supprimés automatiquement après 48 h.</p>${ids.filter(i=>pm[i]).map(i=>`<div class="row" onclick="chat('${i}')" style="cursor:pointer">${av(pm[i])}<div><b>${esc(name(pm[i]))}</b><small>${esc(pm[i].profession||'')}</small></div>${ic('chevron-right')}</div>`).join('')||'<p class="muted">Aucune discussion pour le moment. Vos contacts acceptés se trouvent dans l\'onglet Contacts.</p>'}<button class="ghost" style="margin-top:1rem;width:100%" onclick="closeSheet()">Fermer</button>`)}
 /* ---------- DÉMARRAGE ---------- */
 sb.auth.onAuthStateChange((ev,s)=>{const u=s?.user||null;if(ev=='PASSWORD_RECOVERY'){me=u;rec=1;recView();return}if(rec)return;if((u&&u.id)!==(me&&me.id)){me=u;me?start():authView()}});
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;if(view=='me')V.me()});addEventListener('appinstalled',()=>{ip=null;toast('DropAffy est installé.')});
