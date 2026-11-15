@@ -1,0 +1,8 @@
+/* Espace équipe : styles propres à l'administration */
+#app{padding-bottom:40px;max-width:1100px}
+.apill{display:inline-block;vertical-align:middle;margin-left:.5rem;font:600 12px var(--f2);letter-spacing:0;background:#ffffff26;color:#fff;padding:.15rem .6rem;border-radius:99px}
+.alink{color:#fff;font-weight:600;font-size:13.5px;padding:0 .6rem;text-decoration:none;opacity:.9}
+.atabs{display:flex;gap:.4rem;overflow-x:auto;padding:.7rem 1.1rem;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:61px;z-index:4}
+.atabs button{background:none;color:var(--mut);white-space:nowrap}.atabs button.on{background:var(--sky);color:var(--blue)}
+.row.w{flex-wrap:wrap}.row.w .acts{flex:1 1 100%;justify-content:flex-end;align-items:center}.row .acts select{width:auto;margin:0}
+@media(min-width:900px){#app{max-width:1100px}.row.w .acts{flex:none}}
