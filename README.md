@@ -27,9 +27,9 @@ Réseau commercial digital d'Afrique de l'Ouest. Les membres se découvrent par 
 L'ordre de chargement des scripts est dans `index.html` et `admin.html`. L'espace équipe n'utilise aucun fichier de l'application membre, seulement `lib.js` et `style.css`.
 
 ## Règles métier
-- Publications visibles **48 h** après validation (bouton Actualiser avant expiration). Toute modification de contenu repasse en validation.
+- Publications visibles **5 jours** après validation (bouton Actualiser avant expiration). Sans actualisation, elles disparaissent de l'application mais restent consultables par l'équipe (onglet Publications, Expirées) pendant **2 mois**, puis sont supprimées automatiquement. Toute modification de contenu repasse en validation.
 - Les **5 mises en contact** sont comptées pour le membre (annonceur), toutes publications confondues. 100 FCFA débloquent 5 nouvelles mises en contact, après confirmation manuelle du paiement par l'équipe.
-- Une demande de contact sans réponse disparaît après 48 h. Une fois approuvée, le demandeur accède au WhatsApp de l'annonceur.
+- Chaque mise en contact (demande, contact accepté, discussion liée) disparaît **3 jours** après son déclenchement, y compris l'accès WhatsApp. Le compteur des 5 mises en contact n'est pas remboursé. Une nouvelle mise en contact peut ensuite être déclenchée.
 - Messages supprimés après 48 h.
 
 ## Rôles de l'équipe (table `admins`)
