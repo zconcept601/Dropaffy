@@ -1,5 +1,5 @@
 /* Équipe (propriétaire) : membres de l'équipe, liste de tous les membres, choix du rôle, journal */
-const AL={pub_validated:'Publication validée',pub_rejected:'Publication refusée',payment_confirmed:'Paiement confirmé',payment_rejected:'Paiement rejeté',team_added:"Membre ajouté à l'équipe",team_role:'Rôle modifié',team_removed:"Membre retiré de l'équipe",match_added:'Membre ajouté à une analyse',match_retry:'Analyse relancée'};
+const AL={pub_validated:'Publication validée',pub_rejected:'Publication refusée',payment_confirmed:'Paiement confirmé',payment_rejected:'Paiement rejeté',team_added:"Membre ajouté à l'équipe",team_role:'Rôle modifié',team_removed:"Membre retiré de l'équipe",match_added:'Membre ajouté à une analyse',match_retry:'Analyse relancée',admin_message:'Discussion ouverte avec un membre'};
 const rsel=(v,x='')=>`<select ${x}>${Object.entries(ROLES).map(([k,l])=>`<option value="${k}" ${k==v?'selected':''}>${l}</option>`).join('')}</select>`;
 let mq='',mpage=0,mlist=[],mtm;
 async function aTeam(){const{data:T,error}=await sb.rpc('admin_list_team');

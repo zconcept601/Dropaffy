@@ -1,7 +1,7 @@
 /* Paiements en attente : confirmation et rejet réservés au rôle Finance (et au propriétaire) */
 async function aPay(){const{data:py,error}=await sb.from('payments').select('*,profiles(id,first_name,last_name,avatar_url)').eq('status','pending').order('created_at');
  if(error){$('#dc').innerHTML='<div class="empty"><b>Chargement impossible</b><br><button style="margin-top:1rem" onclick="aPay()">Réessayer</button></div>';return}
- const ids=(py||[]).map(p=>p.user_id);const{data:pv}=ids.length?await sb.from('profile_private').select('user_id,orange_money').in('user_id',ids):{data:[]};
+ const ids=(py||[]).map(p=>p.user_id);const{data:pv}=ids.length?await sb.rpc('admin_orange_money',{p_ids:ids}):{data:[]};
  const om=Object.fromEntries((pv||[]).map(x=>[x.user_id,x.orange_money]));
  $('#dc').innerHTML=`<h2>Paiements à confirmer (${(py||[]).length})</h2>${(py||[]).map(p=>`<div class="row w">${av(p.profiles)}<div><b>${esc(name(p.profiles))} · ${p.amount} FCFA</b><small>Réf. : ${esc(p.reference||'non indiquée')}${om[p.user_id]?' · Orange Money '+esc(om[p.user_id]):''} · ${ago(p.created_at)}</small></div><span class="acts"><button class="sm bad" onclick="once(this,()=>payAct('${p.id}',0))">${ic('x')}Rejeter</button><button class="sm" onclick="once(this,()=>payAct('${p.id}',1))">${ic('check')}Confirmer</button></span></div>`).join('')||'<div class="empty"><b>Aucun paiement en attente</b></div>'}`}
 async function payAct(id,ok){if(!confirm(ok?'Confirmer ce paiement et ajouter 5 mises en contact ?':'Rejeter ce paiement ?'))return;const{error}=await sb.rpc(ok?'admin_confirm_payment':'admin_reject_payment',{p_id:id});toast(error?'Action impossible.':ok?'Paiement confirmé, crédits ajoutés.':'Paiement rejeté.');aPay()}
