@@ -35,10 +35,6 @@ nav .pub span{background:var(--blue);color:#fff;width:54px;height:54px;border-ra
 .quota{background:var(--ink);color:#fff;border-radius:20px;padding:1.3rem;margin:.4rem 0 1rem}.quota b{font:800 38px var(--f1)}.quota small{color:#B9C6EA}.bar{height:10px;background:#ffffff26;border-radius:9px;margin:.8rem 0;overflow:hidden}.bar i{display:block;height:100%;background:var(--amber);border-radius:9px}
 .row{display:flex;gap:.8rem;align-items:center;background:#fff;border-radius:16px;padding:.9rem;margin-bottom:.7rem}.row.c{cursor:pointer}.row.u{border-left:4px solid var(--blue)}.row>div{flex:1;min-width:0;display:grid}.row .acts{display:flex;gap:.5rem;flex:none}.row b{font-size:17px}
 h4{margin:1.3rem 0 .6rem;font-size:15px;color:var(--mut)}
-#sheet{position:fixed;inset:0;background:#0b1f4b8c;z-index:20;display:none;align-items:flex-end;justify-content:center}#sheet.on{display:flex}
-.panel{background:#fff;width:100%;max-height:90%;overflow:auto;border-radius:24px 24px 0 0;padding:1.4rem 1.2rem calc(1.4rem + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}@keyframes up{from{transform:translateY(40px);opacity:0}}
-.msgs{display:grid;gap:.5rem;max-height:46vh;overflow:auto;margin:.8rem 0}.m{max-width:82%;padding:.55rem .9rem;border-radius:16px;background:var(--bg);font-size:16px}.m small{display:block;opacity:.7}.m.me{justify-self:end;background:var(--blue);color:#fff}
-.send{display:flex;gap:.5rem}.send input{margin:0}.send button{width:52px;padding:0}
 #toast{position:fixed;left:50%;bottom:112px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.8rem 1.2rem;border-radius:13px;z-index:30;display:none;max-width:90%;text-align:center}
 .hero{background:var(--ink);color:#fff;padding:calc(2.2rem + env(safe-area-inset-top,0px)) 1.4rem 2rem;position:relative;overflow:hidden}
 .hero h1{font-size:30px;font-weight:800;max-width:11em}.hero p{color:#B9C6EA;margin-top:.8rem;max-width:26em;font-size:17px}
@@ -127,3 +123,14 @@ nav button{min-height:54px;font-size:11.5px}
 }
 @media(min-width:900px){#list.stack{gap:.9rem}}
 @media(max-width:359px){#list .card h3{font-size:16.5px}#list .card footer button{padding:.3rem .6rem;font-size:13.5px}}
+
+/* Suggestion « Publier ma recherche » sous les résultats */
+.sg{display:flex;align-items:center;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:.9rem 0 .2rem;text-align:center}
+
+/* Accueil : bouton Filtres et pastilles */
+.bar2{display:flex;gap:.5rem;align-items:center}.bar2 .sbx{flex:1}
+.fbtn{position:relative;width:44px;min-height:42px;padding:0;flex:none}
+.fbtn em{position:absolute;top:-5px;right:-5px;background:var(--blue);color:#fff;font:600 11px var(--f2);min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;font-style:normal}
+.fchips{display:flex;gap:.4rem;flex-wrap:wrap;margin:.6rem 0 0}
+.fchip{min-height:30px;padding:.15rem .55rem .15rem .75rem;font-size:12.5px;border-radius:99px;background:var(--sky);color:var(--blue);gap:.25rem}
+.fchip svg.lucide{width:14px;height:14px}.fchip.all{background:none;color:var(--mut);padding:.15rem .5rem}
